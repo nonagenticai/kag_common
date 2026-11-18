@@ -78,7 +78,7 @@ dev = [
     "pytest-cov>=7.0.0",
     "httpx>=0.28.0",
     "ruff>=0.15.0",
-    "ty==0.0.49",
+    "ty==0.0.104",
     "bandit>=1.9.4",
     "pip-audit>=2.10.0",
     # pip is pulled in transitively by pip-audit (via pip-api); floor it past PYSEC-2026-3721.
