@@ -135,7 +135,7 @@ from kag_common.internal_token import InternalTokenVerifier, InvalidInternalToke
 verifier = InternalTokenVerifier(jwks_url=settings.internal_token_jwks_url)
 
 try:
-    verified = await verifier.verify(token)        # X-Internal-Token bearer
+    verified = await verifier.verify(token)  # X-Internal-Token bearer
 except InvalidInternalTokenError:
     return unauthorized_response("invalid internal token")
 tenant_id = verified.tenant_id
@@ -187,28 +187,38 @@ JWT in `Authorization` must not opt in until those callers move.
 
 ```python
 from kag_common.auth import (
-    LicenceTenantMismatch, apply_effective_tenant, bind_plain_tenant,
-    extract_license_token_with_source, introspect_license,
+    LicenceTenantMismatch,
+    apply_effective_tenant,
+    bind_plain_tenant,
+    extract_license_token_with_source,
+    introspect_license,
 )
 
-token, source = extract_license_token_with_source(request)   # env-gated
+token, source = extract_license_token_with_source(request)  # env-gated
 if token:
     intro = await introspect_license(token)
     if intro is None:
-        return error(503, ...)          # no verdict; not the caller's fault
+        return error(503, ...)  # no verdict; not the caller's fault
     if not intro.get("active"):
-        return error(401, ...)          # HARD: no fallback (George 2026-10-14)
+        return error(401, ...)  # HARD: no fallback (George 2026-10-14)
     credential_tenant = str(intro.get("tenant_id") or intro.get("subject_id") or "")
     subject_id = str(intro.get("subject_id") or "")
     try:
         requested = await bind_plain_tenant(
-            request, credential_tenant=credential_tenant, subject_id=subject_id,
-            source=source, resolve=resolve_tenant_to_uuid,   # your resolver
+            request,
+            credential_tenant=credential_tenant,
+            subject_id=subject_id,
+            source=source,
+            resolve=resolve_tenant_to_uuid,  # your resolver
         )
     except LicenceTenantMismatch as exc:
         return error(403, str(exc))
     tenant, subject, licence = apply_effective_tenant(
-        request, subject_id, credential_tenant, subject_id, intro.get("license_id"),
+        request,
+        subject_id,
+        credential_tenant,
+        subject_id,
+        intro.get("license_id"),
         requested=requested,
     )
     # a re-scoped (delegated) tenant is caller input: verify it against the registry
@@ -268,7 +278,7 @@ accepts a bare `X-Tenant-Id` from a trusted peer moves that one branch to:
 from kag_common.auth import is_trusted_identity_source
 
 client_host = request.client.host if request.client else None
-if is_trusted_identity_source(client_host):        # was: is_trusted_network(...)
+if is_trusted_identity_source(client_host):  # was: is_trusted_network(...)
     raw_tenant = request.headers.get("X-Tenant-Id", "").strip()
     ...
 # flag off -> falls through to normal token auth and fails closed
