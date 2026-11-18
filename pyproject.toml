@@ -1,0 +1,118 @@
+[project]
+license = "Apache-2.0"
+name = "kag-common"
+version = "0.37.1"
+description = "Shared infrastructure for KAG backend services (settings base, logging, middleware, telemetry, env/validators, license-introspect auth, prom counters, idempotency helper, RLS + PHI access-audit helpers) — ships no migrations and creates no tables; each consumer owns its own table + DB/user"
+requires-python = ">=3.14"
+dependencies = [
+    "structlog>=24.4.0",
+    "opentelemetry-api>=1.24.0",
+    "opentelemetry-sdk>=1.24.0",
+    "opentelemetry-exporter-otlp-proto-http>=1.24.0",
+    "starlette>=1.0.1",
+    "httpx>=0.28.0",
+    "cachetools>=5.3.0",
+    "prometheus-client>=0.20.0",
+    "pydantic>=2.10.0",
+    "pydantic-settings>=2.14.2",
+    # idempotency helper: SQLAlchemy Core/ORM only. psycopg (the async driver)
+    # lives in each consumer's engine, not here — kag_common never opens a connection.
+    "sqlalchemy[asyncio]>=2.0.0",
+    # internal-token verifier (Lane F1): RS256 JWT verify needs pyjwt + the
+    # cryptography backend it uses for RSA. No live connection — JWKS over httpx.
+    "pyjwt>=2.15.1",
+    # Floor is 50.0.0, NOT 44.0.0: CVE-2026-69247 (GHSA-g6cj-pr64-35w5) was
+    # INTRODUCED in cryptography 44.0.0 and fixed in 50.0.0. kag_common is a
+    # PUBLISHED library — its uv.lock does not travel with the wheel, so a
+    # lock-only bump (#27) leaves every consumer free to resolve a vulnerable
+    # 44.x-49.x. The declared floor is the only thing that binds them.
+    "cryptography>=50.0.0",
+    # cost-bus emitter (kag_common.metering): async Redis client. The XADD target
+    # is the cluster cost bus (a SEPARATE Redis from any service cache/broker);
+    # the connection is owned by the consumer and passed into emit/schedule.
+    "redis>=5.0.0",
+    # attestation verifier (FND-008I, kag_common.attestation): the released
+    # ApprovalAttestation/ApplicationReceipt grammar this module verifies against,
+    # plus the canonical schema validator used for the attestation's structural
+    # checks (approval/task ID format, approval round, approver shape). No live
+    # network — the schemas ship inside the wheel (research_contracts' own
+    # force-include), so validation is offline and process-local.
+    "research-contracts @ git+https://github.com/nonagenticai/research_contracts@v0.10.0",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/kag_common"]
+
+# With no `[tool.hatch.build.targets.sdist]`, hatchling packages every VCS-tracked
+# file, so `tests/`, `.github/`, `docs/` and `scripts/` all shipped in the sdist.
+# The tarball's hash then moved whenever any of them did, and the publish guard
+# correctly refused the same-version-different-content republish -- so every
+# test-only or CI-only PR reddened main.
+#
+# That guard is right and stays. The defect is that it was being tripped by
+# changes that are not releases. This repo has paid for it twice already: PR #32
+# "bump version to 0.23.1 for republish" and the stale branch
+# `chore/bump-0.13.1-republish` were both bumps that released nothing.
+#
+# Measured here, by building the sdist rather than inferring: 47 members before,
+# 20 of them under those four directories.
+#
+# EXCLUDE, not an allowlist: an allowlist of `src` would also silently drop
+# anything added later that the package genuinely needs.
+[tool.hatch.build.targets.sdist]
+exclude = [
+    "tests",
+    ".github",
+    "docs",
+    "scripts",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=9.0.0",
+    "pytest-asyncio>=1.3.0",
+    "pytest-cov>=7.0.0",
+    "httpx>=0.28.0",
+    "ruff>=0.15.0",
+    "ty==0.0.49",
+    "bandit>=1.9.4",
+    "pip-audit>=2.10.0",
+    # pip is pulled in transitively by pip-audit (via pip-api); floor it past PYSEC-2026-3721.
+    "pip>=26.2",
+    "detect-secrets>=1.5.0",
+    # async driver for the idempotency helper's real-pg tests (not a runtime dep).
+    "psycopg[binary]>=3.3.0",
+    # in-memory Redis for the cost-bus emitter tests (no live Redis in unit CI).
+    "fakeredis>=2.21.0",
+]
+
+[tool.hatch.metadata]
+allow-direct-references = true
+
+[tool.ruff]
+line-length = 100
+target-version = "py314"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "W", "UP"]
+ignore = ["E501"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+pythonpath = ["src"]
+python_files = ["test_*.py"]
+python_functions = ["test_*"]
+
+[tool.ty.environment]
+python-version = "3.14"
+
+[tool.ty.rules]
+unresolved-import = "ignore"
+
+[tool.coverage.report]
+fail_under = 80

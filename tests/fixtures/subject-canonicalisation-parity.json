@@ -1,0 +1,497 @@
+{
+  "_README": [
+    "THE CROSS-LANGUAGE SUBJECT-CANONICALISATION PARITY CORPUS.",
+    "",
+    "This file MUST be byte-identical in both repositories:",
+    "  kag_common/tests/fixtures/subject-canonicalisation-parity.json",
+    "  fr/backend/tests/fixtures/subject-canonicalisation-parity.json",
+    "Each repo's attestation test suite asserts (a) that its own implementation maps every",
+    "`subject` below to exactly the `canonical` beside it, and (b) that this file's sha256",
+    "equals a literal recorded in that suite. The same sha256 literal appears in both",
+    "suites, so editing the corpus on one side alone turns red on that side and the",
+    "divergence surfaces at review instead of in production.",
+    "",
+    "WHY THIS FILE EXISTS. `_normalise_subject` (Python) and `canonicalSubject`",
+    "(TypeScript) are two implementations of ONE contract. Two rounds of fixes were",
+    "applied to them independently and both rounds diverged, because each suite tested its",
+    "own implementation in isolation: every test on both sides was green while Python's",
+    "`str.strip()` removed five code points (U+0085, U+001C, U+001D, U+001E, U+001F) that",
+    "JavaScript's `trim()` does not. Measured end to end at `required_approvals: 2`, an",
+    "approver pair [alice, U+001C+alice] was `insufficient_approvals` in Python and VALID",
+    "in TypeScript, and the same trick re-opened the self-approval gate. A shared frozen",
+    "corpus is the only instrument that can see that class of defect, because the property",
+    "under test is a relation BETWEEN the two implementations, not a property of either.",
+    "",
+    "`canonical` is the identity key. An EMPTY string means the subject canonicalises to",
+    "nothing and the verifier must REFUSE it (`invalid_approver` / a `None` return), not",
+    "count it as a subject that matches nothing.",
+    "",
+    "Rows are hand-reviewed, not generated from either implementation's output."
+  ],
+  "cases": {
+    "angstrom": {
+      "canonical": "\u00e5alice",
+      "subject": "\u212balice"
+    },
+    "arabic_lam_alef": {
+      "canonical": "\u0644\u0627",
+      "subject": "\ufefb"
+    },
+    "at_domain": {
+      "canonical": "alice@corp",
+      "subject": "alice@corp"
+    },
+    "at_domain_upper": {
+      "canonical": "alice@corp",
+      "subject": "ALICE@CORP"
+    },
+    "bom_feff": {
+      "canonical": "alice",
+      "subject": "\ufeffalice"
+    },
+    "brahmi_number": {
+      "canonical": "alice\ud804\udc7f",
+      "subject": "alice\ud804\udc7f"
+    },
+    "c1_nel_0085": {
+      "canonical": "alice",
+      "subject": "\u0085alice\u0085"
+    },
+    "cap_eszett": {
+      "canonical": "wei\u00dfe",
+      "subject": "WEI\u1e9ee"
+    },
+    "cc_c1_009f": {
+      "canonical": "alice",
+      "subject": "\u009falice\u009f"
+    },
+    "cc_delete_007f": {
+      "canonical": "alice",
+      "subject": "\u007falice\u007f"
+    },
+    "cc_internal_001c": {
+      "canonical": "alice",
+      "subject": "al\u001cice"
+    },
+    "cc_internal_001d": {
+      "canonical": "alice",
+      "subject": "al\u001dice"
+    },
+    "cc_internal_001e": {
+      "canonical": "alice",
+      "subject": "al\u001eice"
+    },
+    "cc_internal_001f": {
+      "canonical": "alice",
+      "subject": "al\u001fice"
+    },
+    "cc_internal_0085": {
+      "canonical": "alice",
+      "subject": "al\u0085ice"
+    },
+    "cc_lf_internal": {
+      "canonical": "alice",
+      "subject": "al\nice"
+    },
+    "cc_mixed_case": {
+      "canonical": "alice",
+      "subject": "\u001d ALICE \u0085"
+    },
+    "cc_nul_internal": {
+      "canonical": "alice",
+      "subject": "al\u0000ice"
+    },
+    "cc_tab_internal": {
+      "canonical": "alice",
+      "subject": "al\tice"
+    },
+    "cgj": {
+      "canonical": "al\u034fice",
+      "subject": "al\u034fice"
+    },
+    "cherokee_lower": {
+      "canonical": "\uab70\uab71",
+      "subject": "\uab70\uab71"
+    },
+    "cherokee_upper": {
+      "canonical": "\uab70\uab71",
+      "subject": "\u13a0\u13a1"
+    },
+    "circled": {
+      "canonical": "alice",
+      "subject": "\u24d0\u24db\u24d8\u24d2\u24d4"
+    },
+    "combining_acute": {
+      "canonical": "jos\u00e9",
+      "subject": "jose\u0301"
+    },
+    "cr": {
+      "canonical": "alice",
+      "subject": "\ralice\r"
+    },
+    "cyrillic_a": {
+      "canonical": "\u0430lice",
+      "subject": "\u0430lice"
+    },
+    "deseret_lower": {
+      "canonical": "\ud801\udc28",
+      "subject": "\ud801\udc28"
+    },
+    "deseret_upper": {
+      "canonical": "\ud801\udc28",
+      "subject": "\ud801\udc00"
+    },
+    "diverge_file_sep_001c": {
+      "canonical": "alice",
+      "subject": "\u001calice\u001c"
+    },
+    "diverge_group_sep_001d": {
+      "canonical": "alice",
+      "subject": "\u001dalice\u001d"
+    },
+    "diverge_nel_0085": {
+      "canonical": "alice",
+      "subject": "\u0085alice\u0085"
+    },
+    "diverge_record_sep_001e": {
+      "canonical": "alice",
+      "subject": "\u001ealice\u001e"
+    },
+    "diverge_unit_sep_001f": {
+      "canonical": "alice",
+      "subject": "\u001falice\u001f"
+    },
+    "dot_trail": {
+      "canonical": "alice.",
+      "subject": "alice."
+    },
+    "dotless_i": {
+      "canonical": "al\u0131ce",
+      "subject": "al\u0131ce"
+    },
+    "dotted_I_lead": {
+      "canonical": "ialice",
+      "subject": "\u0130alice"
+    },
+    "dotted_I_upper": {
+      "canonical": "alice",
+      "subject": "AL\u0130CE"
+    },
+    "emoji": {
+      "canonical": "alice\ud83d\ude00",
+      "subject": "alice\ud83d\ude00"
+    },
+    "empty": {
+      "canonical": "",
+      "subject": ""
+    },
+    "eszett": {
+      "canonical": "wei\u00dfe",
+      "subject": "wei\u00dfe"
+    },
+    "eszett_ss": {
+      "canonical": "weisse",
+      "subject": "weisse"
+    },
+    "figure_space": {
+      "canonical": "alice",
+      "subject": "\u2007alice"
+    },
+    "file_sep_1c": {
+      "canonical": "alice",
+      "subject": "\u001calice\u001c"
+    },
+    "formfeed_0c": {
+      "canonical": "alice",
+      "subject": "\falice"
+    },
+    "fullwidth": {
+      "canonical": "alice",
+      "subject": "\uff41\uff4c\uff49\uff43\uff45"
+    },
+    "fullwidth_upper": {
+      "canonical": "alice",
+      "subject": "\uff21\uff2c\uff29\uff23\uff25"
+    },
+    "greek_omicron": {
+      "canonical": "b\u03bfb",
+      "subject": "b\u03bfb"
+    },
+    "hair_space": {
+      "canonical": "alice",
+      "subject": "\u200aalice"
+    },
+    "halfwidth_hangul_filler": {
+      "canonical": "\u1160alice",
+      "subject": "\uffa0alice"
+    },
+    "halfwidth_kana": {
+      "canonical": "\u30ab",
+      "subject": "\uff76"
+    },
+    "hangul_compat": {
+      "canonical": "\u1100",
+      "subject": "\u3131"
+    },
+    "hangul_filler": {
+      "canonical": "\u1160alice",
+      "subject": "\u3164alice"
+    },
+    "hangul_jamo": {
+      "canonical": "\uac00",
+      "subject": "\u1100\u1161"
+    },
+    "hangul_syll": {
+      "canonical": "\uac00",
+      "subject": "\uac00"
+    },
+    "i_plus_dot": {
+      "canonical": "alice",
+      "subject": "ali\u0307ce"
+    },
+    "i_plus_dot_direct": {
+      "canonical": "alice",
+      "subject": "ali\u0307ce"
+    },
+    "i_plus_dot_double": {
+      "canonical": "alice",
+      "subject": "ali\u0307\u0307ce"
+    },
+    "ideographic_space": {
+      "canonical": "alice",
+      "subject": "\u3000alice\u3000"
+    },
+    "interlinear": {
+      "canonical": "alice",
+      "subject": "alice\ufff9"
+    },
+    "internal_space": {
+      "canonical": "al ice",
+      "subject": "al ice"
+    },
+    "isolate_fsi_pdi": {
+      "canonical": "alice",
+      "subject": "\u2068alice\u2069"
+    },
+    "kelvin": {
+      "canonical": "kalice",
+      "subject": "\u212aalice"
+    },
+    "khmer_inherent_aq": {
+      "canonical": "alice\u17b4",
+      "subject": "alice\u17b4"
+    },
+    "khmer_viriam": {
+      "canonical": "alice\u17d4",
+      "subject": "alice\u17d4"
+    },
+    "lead_space": {
+      "canonical": "alice",
+      "subject": " alice"
+    },
+    "ligature_ff": {
+      "canonical": "office",
+      "subject": "o\ufb00ice"
+    },
+    "ligature_fi": {
+      "canonical": "ofice",
+      "subject": "o\ufb01ce"
+    },
+    "long_s": {
+      "canonical": "salice",
+      "subject": "\u017falice"
+    },
+    "lre_pdf": {
+      "canonical": "alice",
+      "subject": "\u202aalice\u202c"
+    },
+    "lrm": {
+      "canonical": "alice",
+      "subject": "\u200ealice"
+    },
+    "math_bold": {
+      "canonical": "alice",
+      "subject": "\ud835\udc1a\ud835\udc25\ud835\udc22\ud835\udc1c\ud835\udc1e"
+    },
+    "math_sans_it": {
+      "canonical": "alice",
+      "subject": "\ud835\ude22\ud835\ude2d\ud835\ude2a\ud835\ude24\ud835\ude26"
+    },
+    "medium_math_space": {
+      "canonical": "alice",
+      "subject": "\u205falice"
+    },
+    "mongolian_vowel_sep": {
+      "canonical": "alice",
+      "subject": "\u180ealice"
+    },
+    "musical_null": {
+      "canonical": "alice",
+      "subject": "alice\ud834\udd73"
+    },
+    "narrow_nbsp": {
+      "canonical": "alice",
+      "subject": "\u202falice\u202f"
+    },
+    "nbsp_edge": {
+      "canonical": "alice",
+      "subject": "\u00a0alice\u00a0"
+    },
+    "nbsp_internal": {
+      "canonical": "al ice",
+      "subject": "al\u00a0ice"
+    },
+    "newline": {
+      "canonical": "alice",
+      "subject": "\nalice\n"
+    },
+    "nul": {
+      "canonical": "alice",
+      "subject": "\u0000alice"
+    },
+    "ogham_space": {
+      "canonical": "alice",
+      "subject": "\u1680alice"
+    },
+    "ohm": {
+      "canonical": "\u03c9alice",
+      "subject": "\u2126alice"
+    },
+    "only_001c": {
+      "canonical": "",
+      "subject": "\u001c"
+    },
+    "only_007f": {
+      "canonical": "",
+      "subject": "\u007f"
+    },
+    "only_0085": {
+      "canonical": "",
+      "subject": "\u0085"
+    },
+    "only_cf": {
+      "canonical": "",
+      "subject": "\u200b\u200d"
+    },
+    "only_nbsp": {
+      "canonical": "",
+      "subject": "\u00a0"
+    },
+    "only_nul": {
+      "canonical": "",
+      "subject": "\u0000"
+    },
+    "only_space": {
+      "canonical": "",
+      "subject": "   "
+    },
+    "plain": {
+      "canonical": "alice",
+      "subject": "alice"
+    },
+    "precomposed_acute": {
+      "canonical": "jos\u00e9",
+      "subject": "jos\u00e9"
+    },
+    "rlm": {
+      "canonical": "alice",
+      "subject": "\u200falice"
+    },
+    "rlo": {
+      "canonical": "alice",
+      "subject": "\u202ealice"
+    },
+    "roman_numeral": {
+      "canonical": "i",
+      "subject": "\u2160"
+    },
+    "shorthand_format": {
+      "canonical": "alice",
+      "subject": "alice\ud82f\udca0"
+    },
+    "sigma_cap": {
+      "canonical": "\u03c3",
+      "subject": "\u03a3"
+    },
+    "sigma_final": {
+      "canonical": "\u03c2",
+      "subject": "\u03c2"
+    },
+    "sigma_mid": {
+      "canonical": "\u03c3",
+      "subject": "\u03c3"
+    },
+    "soft_hyphen": {
+      "canonical": "alice",
+      "subject": "al\u00adice"
+    },
+    "squared_latin": {
+      "canonical": "da",
+      "subject": "\u3372"
+    },
+    "superscript": {
+      "canonical": "alice",
+      "subject": "\u1d43\u02e1\u2071\u1d9c\u1d49"
+    },
+    "tab": {
+      "canonical": "alice",
+      "subject": "\talice\t"
+    },
+    "tag_char": {
+      "canonical": "alice",
+      "subject": "alice\udb40\udc41"
+    },
+    "title": {
+      "canonical": "alice",
+      "subject": "Alice"
+    },
+    "trail_space": {
+      "canonical": "alice",
+      "subject": "alice "
+    },
+    "trailing_combining": {
+      "canonical": "alic\u00e9",
+      "subject": "alice\u0301"
+    },
+    "turkish_dotless_i": {
+      "canonical": "al\u0131ce",
+      "subject": "al\u0131ce"
+    },
+    "turkish_dotted_I": {
+      "canonical": "alice",
+      "subject": "AL\u0130CE"
+    },
+    "unit_sep_1f": {
+      "canonical": "alice",
+      "subject": "\u001falice\u001f"
+    },
+    "upper": {
+      "canonical": "alice",
+      "subject": "ALICE"
+    },
+    "varsel_fe0f": {
+      "canonical": "alice\ufe0f",
+      "subject": "alice\ufe0f"
+    },
+    "vtab_0b": {
+      "canonical": "alice",
+      "subject": "\u000balice"
+    },
+    "word_joiner": {
+      "canonical": "alice",
+      "subject": "al\u2060ice"
+    },
+    "zwj": {
+      "canonical": "alice",
+      "subject": "al\u200dice"
+    },
+    "zwnj": {
+      "canonical": "alice",
+      "subject": "al\u200cice"
+    },
+    "zwsp": {
+      "canonical": "alice",
+      "subject": "al\u200bice"
+    }
+  }
+}

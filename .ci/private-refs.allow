@@ -1,0 +1,6 @@
+# Reviewed allowlist — the guard's subject IS private-address space.
+# The classifier's own range table names RFC 6598 CGNAT (100.64.0.0/10); that is
+# the rule under test, not a reference to an estate host.
+
+src/kag_common/metrics.py:100\.64\.   # RFC 6598 range named by the address classifier
+tests/test_tokenless_tenant_observability.py:100\.64\.   # fixture asserts a CGNAT address is classified tailnet
